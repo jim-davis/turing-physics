@@ -1,10 +1,6 @@
 class Sun
   inherit PhysOb
   
-   body proc step (seconds: real)
-     % as per Galileo, the SUN does not move
-   end step
-  
   body proc draw
     % The Sun does  not move, so we do not want to turn it grey when it is still
     drawfilloval(floor(x),floor(y),radius,radius,yellow)
