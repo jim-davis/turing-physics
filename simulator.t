@@ -9,7 +9,7 @@ class Simulator
   var hasGravity:boolean:=false
 
   proc initialize(hasGravity_: boolean)
-    hasGravity:=hasGravity
+    hasGravity := hasGravity_
   end initialize
 
   proc addObj(b: pointer to PhysOb)
@@ -33,26 +33,11 @@ class Simulator
     end for
   end draw_world
 
-  proc step(seconds: real)
-    for i:1..objCounter
-      objs(i) -> hide
-      objs(i) -> force_reset()
-    end for
- 
-    if hasGravity then
-      gravity()
-    end if
-    for i:1..objCounter
-      objs(i) -> step(seconds)
-    end for
-    draw_world()
-  
-  end step
   
   function any_motion: boolean
     for i:1..objCounter
       if objs(i) -> isMoving() then
-	result true
+    result true
       end if
     end for
     result false
@@ -64,13 +49,28 @@ class Simulator
     if sim_time > 0 then
       fps :=  intstr(floor(frame_counter / sim_time)) + " fps"
     else
-	  fps:=""
+      fps:=""
     end if
     Draw.Text(realstr(sim_time,6) + " secs " + fps, 10, 10, font, black)
     frame_counter := frame_counter + 1
   end show_stats
 
-  proc run(duration: int)
+  proc step(seconds: real)
+    for i:1..objCounter
+      objs(i) -> force_reset()
+    end for
+    if hasGravity then
+      gravity()
+    end if
+
+    drawfill(1,1,white,black)
+    for i:1..objCounter
+      objs(i) -> step(seconds)
+    end for
+    draw_world()
+  end step
+
+  proc run(duration: real)
     var now,last_now: int :=0
     clock(now)
     last_now := now
@@ -79,10 +79,11 @@ class Simulator
       var step_duration:real := (now - last_now) /1000
       last_now := now
       step(step_duration)
+      show_stats()
       delay(20)
       sim_time := sim_time + step_duration
-      show_stats()
-      exit when sim_time >= duration or not any_motion()
+
+      exit when sim_time >= duration 
     end loop
   end run
 
