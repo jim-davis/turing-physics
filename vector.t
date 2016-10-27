@@ -34,7 +34,14 @@ function vector_bearing(v1: vector, v2:vector): real
       result -Math.PI/2
     end if
   else
-    result arctan((v2.x - v1.x)/ (v2.y - v1.y))
+    var dx: real := v2.x - v1.x
+    var angle : real := arctan(dx/ (v2.y - v1.y))
+    if angle < 0 and dx > 0 then
+      angle := angle + Math.PI
+    elsif angle > 0 and dx < 0 then
+      angle := angle - Math.PI
+    end if
+    result angle
   end if
 end vector_bearing
 

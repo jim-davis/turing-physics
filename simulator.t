@@ -1,6 +1,6 @@
 class Simulator
   import PhysOb,vector,vector_invert
-  export initialize,addObj,run
+  export initialize,addObj,run,step
   var objs: array 1..10 of pointer to PhysOb
   var objCounter: int :=0
   var sim_time:real:=0
@@ -59,11 +59,12 @@ class Simulator
     for i:1..objCounter
       objs(i) -> force_reset()
     end for
+    drawfill(1,1,white,black)
     if hasGravity then
       gravity()
     end if
 
-    drawfill(1,1,white,black)
+    
     for i:1..objCounter
       objs(i) -> step(seconds)
     end for
@@ -80,7 +81,7 @@ class Simulator
       last_now := now
       step(step_duration)
       show_stats()
-      delay(20)
+      delay(10)
       sim_time := sim_time + step_duration
 
       exit when sim_time >= duration 

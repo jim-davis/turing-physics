@@ -13,6 +13,7 @@ floor_gravity:=false
 % TODO
 % collisions between balls
 % gravity between balls. 
+% draw path (record history of position)
 
 var sim: pointer to Simulator
 new sim
@@ -22,44 +23,25 @@ sim -> initialize(have_sun)
 if have_sun then
 
   new sun
-  sun -> initialize(1000000,50, yellow, maxx/2, maxy/2,0,0)
+  sun -> initialize("sun", 1000000,20, yellow, maxx/2, maxy/2,0,0)
   sim -> addObj(sun)
 end if
 
-var b: pointer to Ball
+var p1: pointer to Ball
+new p1
+p1 -> initialize("A", 10,4, blue, 110, maxy/2-100, -2, 10)
 
-new b
-b -> initialize(10,20, blue, 100, maxy-20-80, 40,0)
-sim -> addObj(b)
+var p2: pointer to Ball
+new p2
+p2 -> initialize("B", 10, 4, red, 300, 300, 10, 0)
 
+var p3: pointer to Ball
+new p3
+p3 -> initialize("C", 30,5, green, 150, maxy-0, 20, -20)
 
-/*
-new b
-b -> initialize(10,20, blue, 300, 100, -10, 50)
-sim -> addObj(b)
-*/
-/*
-new b
-b -> initialize(20,30, green, 150, maxy-0, 20, -20)
-sim -> addObj(b)
-*/
+sim -> addObj(p1)
+sim -> addObj(p2)
+sim -> addObj(p3)
 
-sim-> run(20)
-
-/*
-var middle: vector := make_vector(maxx/2, maxy/2)
-
-var v: vector := make_vector(maxx/2+120, 50)
-
-put "middle=" + vector_str(middle) + " v=" + vector_str(v)
-put vector_str(vector_difference(middle,v))
-put vector_str(vector_difference(v,middle))
-
-put "distance m,v= " + realstr(vector_distance(middle,v),2) + " v,m= " + realstr(vector_distance(v,middle),2)
-
-put "Bearing UP = " + realstr(vector_bearing(middle, make_vector(maxx/2, 400)),2)
-put "Bearing DOWN = " + realstr(vector_bearing(middle, make_vector(maxx/2, 1)),2)
-
-put "Bearing RIGHT = " + realstr(vector_bearing(middle, make_vector(maxx/2 + 200, maxy/2+0)),2)
-put "Bearing WEST = " + realstr(vector_bearing(middle, make_vector(maxx/2  - 200, maxy/2+1)),2)
-*/
+%sim-> step(1)
+sim -> run(30)
