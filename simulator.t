@@ -1,15 +1,14 @@
 class Simulator
-  import PhysOb,vector,vector_invert
+  import Configuration,PhysOb,vector,vector_invert
   export initialize,addObj,run,step
   var objs: array 1..10 of pointer to PhysOb
   var objCounter: int :=0
   var sim_time:real:=0
   var frame_counter: int:=0
-  var font:int:=Font.New("serif:12")
-  var hasGravity:boolean:=false
+  var config: pointer to Configuration
 
-  proc initialize(hasGravity_: boolean)
-    hasGravity := hasGravity_
+  proc initialize(config_: pointer to Configuration)
+    config := config_
   end initialize
 
   proc addObj(b: pointer to PhysOb)
@@ -32,7 +31,6 @@ class Simulator
       objs(i) -> draw
     end for
   end draw_world
-
   
   function any_motion: boolean
     for i:1..objCounter
@@ -51,7 +49,7 @@ class Simulator
     else
       fps:=""
     end if
-    Draw.Text(realstr(sim_time,6) + " secs " + fps, 10, 10, font, black)
+    Draw.Text(realstr(sim_time,6) + " secs " + fps, 10, 10, config -> font, black)
     frame_counter := frame_counter + 1
   end show_stats
 
@@ -60,10 +58,9 @@ class Simulator
       objs(i) -> force_reset()
     end for
     drawfill(1,1,white,black)
-    if hasGravity then
+    if config -> hasGravity ()then
       gravity()
     end if
-
     
     for i:1..objCounter
       objs(i) -> step(seconds)
@@ -81,7 +78,7 @@ class Simulator
       last_now := now
       step(step_duration)
       show_stats()
-      delay(10)
+      delay(5)
       sim_time := sim_time + step_duration
 
       exit when sim_time >= duration 

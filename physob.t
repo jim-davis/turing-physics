@@ -1,17 +1,9 @@
-var WRAP:string:="wrap"
-var BOUNCE:string:="bounce"
-var CLIP:string:="clip"
-
-var geometry:string:=WRAP
-var floor_gravity: boolean:=false
-
 % a physical object at a point with mass and velocity
 class PhysOb
-  import geometry,WRAP,BOUNCE,CLIP,floor_gravity,vector,vector_distance,vector_bearing,vector_str
-  export initialize,getName,draw,step,isMoving,gravity_force,getPosition,getMass,getRadius,getDistance,force_reset, force_add
+  import WRAP,BOUNCE,CLIP,Configuration,vector, vector_add, vector_distance,vector_bearing, vector_str, vector_scalar_multiply
+  export initialize,getName,draw,step,isMoving,gravity_force,getPosition,getMass,getDistance,force_reset, force_add
 
   deferred procedure draw
-  deferred procedure hide
 
   var name: string
   var position: vector
@@ -22,14 +14,10 @@ class PhysOb
   var velocity: vector
   var forces: vector
 
-  var collision_recoil:real:=1  % "energy" retained after collision with wall.  1 means elastic
-  var G: real := .1  % gravitational constant
-
   var debug:boolean:=false
-  var draw_velocity_vector: boolean:=false
-  var draw_force_vector : boolean :=true
+  var config: pointer to Configuration
 
-  proc initialize(name_ :string, mass_, radius_, colour_: int, x_, y_, vx_, vy_: real)
+  proc initialize(config_: pointer to Configuration, name_ :string, mass_, radius_, colour_: int, x_, y_, vx_, vy_: real)
     name:=name_
     mass:=mass_
     radius:=radius_
@@ -38,28 +26,17 @@ class PhysOb
     position.y:=y_
     velocity.x:=vx_
     velocity.y:=vy_
+    config:=config_
   end initialize
   
   function getName() : string
     result name
   end getName
   
-  function getX() : real
-    result position.x
-  end getX
-  
-  function getY(): real
-    result position.y
-  end getY
-
   function getPosition: vector
     result position
   end getPosition
   
-  function getRadius() : real
-    result radius
-  end getRadius
-
   function getMass(): int
     result mass
   end getMass
@@ -78,7 +55,7 @@ class PhysOb
   
   function gravity_force(o: pointer to PhysOb): vector
     var v:vector
-    var f:real := G * mass * o-> getMass() / getDistance(o)**2
+    var f:real := config -> G * mass * o-> getMass() / getDistance(o)**2
     var theta: real := getBearing(o)
     v.x:=sin(theta)*f
     v.y:=cos(theta)*f
@@ -101,26 +78,26 @@ class PhysOb
   end force_add
 
   proc doGeometry
-    if geometry = WRAP then
+    if config -> geometry = WRAP then
       if position.x  < 0 then
-        position.x := maxx
+	position.x := maxx
       elsif position.x  > maxx then
-        position.x := 0
+	position.x := 0
       end if
       if position.y  < 0 then
-        position.y := maxy 
+	position.y := maxy 
       elsif position.y  > maxy then
-        position.y := 0
+	position.y := 0
       end if
-    elsif geometry = BOUNCE then
+    elsif config -> geometry = BOUNCE then
       % collision with walls.  Walls have infinite mass and collision is almost elastic
        if position.y - radius < 5 or position.y + radius + 5 > maxy then
-         velocity.y:=-velocity.y*collision_recoil
+	 velocity.y:=-velocity.y*config -> collision_recoil
        end if
        if position.x -radius < 5 or position.x + radius + 5 > maxx then
-         velocity.x:=-velocity.x*collision_recoil
+	 velocity.x:=-velocity.x*config -> collision_recoil
        end if
-    elsif geometry = CLIP then
+    elsif config -> geometry = CLIP then
       % just let it go offscreen.  We could delete it, as it will (most likely) never come bacl
     end if
   end doGeometry
@@ -134,29 +111,24 @@ class PhysOb
   end doFloorGravity
 
   proc draw_relative_vector(v: vector, c: int)
-      drawline(floor(position.x), floor(position.y), 
-           floor(position.x + v.x), floor(position.y + v.y), c)
+    drawline(floor(position.x), floor(position.y),		floor(position.x + v.x), floor(position.y + v.y), c)
   end draw_relative_vector
 
   proc step (seconds: real)
-    if floor_gravity then
+    if config -> floor_gravity then
       doFloorGravity(seconds)
     end if
 
-    % acceleration (change in velocity) = force /mass
-    % change in velocity =  acceleration * time
-    velocity.x := velocity.x + forces.x * seconds / mass
-    velocity.y := velocity.y + forces.y * seconds / mass
+    % acceleration = force /mass
+	var acceleration: vector := vector_scalar_multiply(forces, 1/mass)
 
-    if draw_force_vector then
-      draw_relative_vector(forces, red)
-    end if
-    if draw_velocity_vector then
-      draw_relative_vector(velocity, grey)
-    end if
+    % delta_v (change in velocity) =  acceleration * time
+    var delta_v : vector:= vector_scalar_multiply(acceleration, seconds)
+    velocity := vector_add(velocity,delta_v)
 
-    position.x := position.x + velocity.x * seconds
-    position.y := position.y + velocity.y * seconds
+ 	% change in position = velocity * time
+	position := vector_add(position, vector_scalar_multiply(velocity, seconds))
+
     doGeometry
  
   end step

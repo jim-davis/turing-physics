@@ -15,12 +15,20 @@ function getLength(v: vector): real
   result sqrt(v.x ** 2 + v.y ** 2)
 end getLength
 
+function vector_add(v1: vector, v2: vector) : vector
+  var nv: vector
+  nv.x := v1.x + v2.x
+  nv.y := v1.y + v2.y
+  result nv
+end vector_add
+
 function vector_difference(v1: vector, v2: vector) : vector
   var nv: vector
   nv.x := v1.x - v2.x
   nv.y := v1.y - v2.y
   result nv
 end vector_difference
+
 
 function vector_distance(v1: vector, v2: vector): real
   result Math.Distance(v1.x, v1.y, v2.x, v2.y)
@@ -56,3 +64,9 @@ function make_vector(x: real, y: real) :vector
   result nv
 end make_vector
 
+function vector_scalar_multiply (v: vector, s: real) : vector
+  var nv : vector
+  nv.x := v.x * s
+  nv.y := v.y * s
+  result nv
+end vector_scalar_multiply
