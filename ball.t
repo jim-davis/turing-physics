@@ -13,6 +13,11 @@ class Ball
     if config -> draw_velocity_vector then
       draw_relative_vector(velocity, grey)
     end if
+    if config -> draw_history then
+      for i: 1..history_count
+        drawdot(floor(history(i-1).x), floor(history(i-1).y), black)
+      end for
+    end if
 
   end draw
 

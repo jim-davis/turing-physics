@@ -8,11 +8,8 @@ include "simulator.t"
 var config: pointer to Configuration
 new config
 
-% note that floor_gravity and WRAP means objects accelerate forever!
-
 % TODO
 % collisions between balls
-% draw path (record history of position)
 
 var sim: pointer to Simulator
 new sim
@@ -33,10 +30,10 @@ p2 -> initialize(config, "B", 10, 4, red, 300, 300, 10, 0)
 
 var p3: pointer to Ball
 new p3
-p3 -> initialize(config, "C", 30, 5, green, 150, maxy-40, 18, -8)
+p3 -> initialize(config, "C", 30, 5, green, 180, maxy-50, 25, -5)
 
-%sim -> addObj(p1)
-%sim -> addObj(p2)
+sim -> addObj(p1)
+sim -> addObj(p2)
 sim -> addObj(p3)
 
 %sim-> step(1)

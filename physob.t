@@ -1,6 +1,6 @@
 % a physical object at a point with mass and velocity
 class PhysOb
-  import WRAP,BOUNCE,CLIP,Configuration,vector, vector_add, vector_distance,vector_bearing, vector_str, vector_scalar_multiply
+  import WRAP,BOUNCE,CLIP,Configuration,vector, vector_add, vector_copy, vector_distance,vector_bearing, vector_str, vector_scalar_multiply
   export initialize,getName,draw,step,isMoving,gravity_force,getPosition,getMass,getDistance,force_reset, force_add
 
   deferred procedure draw
@@ -16,6 +16,10 @@ class PhysOb
 
   var debug:boolean:=false
   var config: pointer to Configuration
+  var msec_since_last_sample: int := 0
+
+  var history: flexible array 0..1000 of vector
+  var history_count: int :=0
 
   proc initialize(config_: pointer to Configuration, name_ :string, mass_, radius_, colour_: int, x_, y_, vx_, vy_: real)
     name:=name_
@@ -114,6 +118,11 @@ class PhysOb
     drawline(floor(position.x), floor(position.y),		floor(position.x + v.x), floor(position.y + v.y), c)
   end draw_relative_vector
 
+  proc sample_position
+    history_count := history_count + 1
+    history(history_count-1) := vector_copy(position)
+  end sample_position
+
   proc step (seconds: real)
     if config -> floor_gravity then
       doFloorGravity(seconds)
@@ -129,9 +138,18 @@ class PhysOb
  	% change in position = velocity * time
 	position := vector_add(position, vector_scalar_multiply(velocity, seconds))
 
+    if config -> history_sample_period_msec > 0 then
+      msec_since_last_sample := 	msec_since_last_sample + floor(seconds * 1000)
+      if history_count = 0 or msec_since_last_sample > config -> history_sample_period_msec then
+        sample_position
+        msec_since_last_sample := 0
+      end if
+    end if
+
     doGeometry
  
   end step
+
 
 end PhysOb
 

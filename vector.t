@@ -15,6 +15,13 @@ function getLength(v: vector): real
   result sqrt(v.x ** 2 + v.y ** 2)
 end getLength
 
+function vector_copy(v: vector) : vector
+  var nv: vector
+  nv.x := v.x
+  nv.y := v.y
+  result nv
+end vector_copy
+
 function vector_add(v1: vector, v2: vector) : vector
   var nv: vector
   nv.x := v1.x + v2.x
