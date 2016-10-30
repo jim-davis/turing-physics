@@ -7,7 +7,7 @@ class PhysOb
 
   var name: string
   var position: vector
-  var mass: int:=100 % grams
+  var mass: real:=100 % grams
   var radius: int :=20  % pixels
   var mycolour:int := red
   
@@ -18,7 +18,7 @@ class PhysOb
   var history: flexible array 0..100 of vector
   var history_count: int :=0
 
-  proc initialize(config_: pointer to Configuration, name_ :string, mass_, radius_, colour_: int, x_, y_, vx_, vy_: real)
+  proc initialize(config_: pointer to Configuration, name_ :string, mass_ :real, radius_: int, colour_: int, x_, y_, vx_, vy_: real)
     name:=name_
     mass:=mass_
     radius:=radius_
@@ -38,7 +38,7 @@ class PhysOb
     result position
   end getPosition
   
-  function getMass(): int
+  function getMass(): real
     result mass
   end getMass
   
