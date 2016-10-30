@@ -10,15 +10,12 @@ class PhysOb
   var mass: int:=100 % grams
   var radius: int :=20  % pixels
   var mycolour:int := red
-
+  
   var velocity: vector
   var forces: vector
-
-  var debug:boolean:=false
   var config: pointer to Configuration
   var msec_since_last_sample: int := 0
-
-  var history: flexible array 0..1000 of vector
+  var history: flexible array 0..100 of vector
   var history_count: int :=0
 
   proc initialize(config_: pointer to Configuration, name_ :string, mass_, radius_, colour_: int, x_, y_, vx_, vy_: real)
@@ -63,11 +60,6 @@ class PhysOb
     var theta: real := getBearing(o)
     v.x:=sin(theta)*f
     v.y:=cos(theta)*f
-    if debug then
-      put "(", name, " -> " , o->getName(), ") F scalar " , f
-      put "(", name, " -> " , o->getName(), ") Theta=", theta,  " sin=", sin(theta), " cos=", cos(theta)
-      put "F " , vector_str(v)
-    end if
     result v
   end gravity_force
 
@@ -115,11 +107,14 @@ class PhysOb
   end doFloorGravity
 
   proc draw_relative_vector(v: vector, c: int)
-    drawline(floor(position.x), floor(position.y),		floor(position.x + v.x), floor(position.y + v.y), c)
+    drawline(floor(position.x), floor(position.y),              floor(position.x + v.x), floor(position.y + v.y), c)
   end draw_relative_vector
 
   proc sample_position
     history_count := history_count + 1
+    if history_count > upper(history) then
+      new history, history_count * 2
+    end if
     history(history_count-1) := vector_copy(position)
   end sample_position
 
@@ -135,14 +130,14 @@ class PhysOb
     var delta_v : vector:= vector_scalar_multiply(acceleration, seconds)
     velocity := vector_add(velocity,delta_v)
 
- 	% change in position = velocity * time
+	% change in position = velocity * time
 	position := vector_add(position, vector_scalar_multiply(velocity, seconds))
 
     if config -> history_sample_period_msec > 0 then
-      msec_since_last_sample := 	msec_since_last_sample + floor(seconds * 1000)
+      msec_since_last_sample :=         msec_since_last_sample + floor(seconds * 1000)
       if history_count = 0 or msec_since_last_sample > config -> history_sample_period_msec then
-        sample_position
-        msec_since_last_sample := 0
+	sample_position
+	msec_since_last_sample := 0
       end if
     end if
 

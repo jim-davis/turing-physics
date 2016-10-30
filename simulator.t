@@ -78,7 +78,7 @@ class Simulator
       last_now := now
       step(step_duration)
       show_stats()
-      delay(5)
+      delay(10)
       sim_time := sim_time + step_duration
 
       exit when sim_time >= duration 
